@@ -1,8 +1,10 @@
 package com.smile.userbackend.service.impl;
 
-import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.smile.userbackend.common.ErrorCode;
+import com.smile.userbackend.constant.UserConstant;
+import com.smile.userbackend.exception.BusinessException;
 import com.smile.userbackend.model.User;
 import com.smile.userbackend.service.UserService;
 import com.smile.userbackend.mapper.UserMapper;
@@ -14,6 +16,8 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import static com.smile.userbackend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
 * @author Tom Smile
@@ -35,17 +39,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
 
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            return null;
+            throw new BusinessException(ErrorCode.NULL_ERROR);
  }
+
         if (userAccount.length() < 4) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         if (userPassword.length() < 8) {
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
-        if (RegexUtils.isAccountInvalid(userAccount)) {
-            return null;
+        if (!RegexUtils.isAccountInvalid(userAccount)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
         //        进行加密
@@ -66,7 +71,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 //        用户信息脱敏
         User safetyUser = getSafetyUser(user);
 
-//       todo 记录登录态-redis/session
+//       使用session记录登录态
+//       todo 使用redis记录登录态
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
         return safetyUser;
     }
 
@@ -75,13 +82,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 //        校验输入的信息是否合法
         if (StringUtils.isAnyBlank(userAccount, userPassword,checkPassword)) {
-            return -1;    //todo 改写为异常
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         if (userAccount.length() < 4) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         if (userPassword.length() < 8) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
         if (!RegexUtils.isAccountInvalid(userAccount)) {
@@ -114,6 +121,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user.getId();
     }
 
+    @Override
+    public int userLogout(HttpServletRequest request) {
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
+    }
+
     private User getSafetyUser(User originUser) {
         if (originUser == null) {
             return null;
@@ -133,9 +146,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setCreateTime(originUser.getCreateTime());
         return safetyUser;
     }
-
-
-
 
 }
 
