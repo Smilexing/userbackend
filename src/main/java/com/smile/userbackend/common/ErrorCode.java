@@ -1,7 +1,12 @@
 package com.smile.userbackend.common;
 
 public enum ErrorCode {
-    PARAMS_ERROR(400010, "请求参数错误"),
+    SUCCESS(0, "OK"),
+    PARAMS_ERROR(40000, "请求参数错误"),
+    NULL_ERROR(40001, "请求数据为空"),
+    NOT_LOGIN(40100, "未登录"),
+    NOT_AUTH(40101, "未认证"),
+    SYSTEM_ERROR(50000, "系统错误")
     ;
     private final int code;
     private final String message;
