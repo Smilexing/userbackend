@@ -4,6 +4,7 @@ import com.smile.userbackend.common.BaseResponse;
 import com.smile.userbackend.common.ResultUtil;
 import com.smile.userbackend.model.User;
 import com.smile.userbackend.model.request.UserLoginRequest;
+import com.smile.userbackend.model.request.UserRegisterRequest;
 import com.smile.userbackend.service.UserService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,12 +25,12 @@ import javax.servlet.http.HttpServletRequest;
 public class UserController {
     @Resource
     private UserService userService;
+
     @PostMapping("/login")
     public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
             return null;
         }
-
 
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
@@ -42,4 +43,21 @@ public class UserController {
 
     }
 
+    @PostMapping("/register")
+    public BaseResponse userRegister(@RequestBody UserRegisterRequest userRegisterRequest, HttpServletRequest request) {
+        if (userRegisterRequest == null) {
+            return null;
+        }
+
+        String userAccount = userRegisterRequest.getUserAccount();
+        String userPassword = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword,checkPassword )) {
+            return null;
+        }
+
+        long result = userService.userRegister(userAccount, userPassword,checkPassword, request);
+        return ResultUtil.success(result);
+
+    }
 }
