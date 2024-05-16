@@ -53,11 +53,26 @@ public class UserController {
         return ResultUtil.success(user);
     }
 
+    @GetMapping("/current")
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        long userid = currentUser.getId();
+        User user = userService.getById(userid);
+        User safetyUser = userService.getSafetyUser(user);
+        return ResultUtil.success(safetyUser);
+
+    }
+
+
 //    根据用户名进行查询
     @GetMapping("/search")
     public BaseResponse<List<User>> userSearch(String username, HttpServletRequest request) {
-        if(!isAdmin(request))
-        {
+
+        if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NOT_AUTH);
         }
         if (StringUtils.isBlank(username)) {
@@ -88,6 +103,7 @@ public class UserController {
         User user = (User) userObj;
         return user != null &&user.getUserRole() == ADMIN_ROLE;
     }
+
 
 
     @PostMapping("/register")
