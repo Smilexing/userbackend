@@ -74,6 +74,12 @@ public class User implements Serializable {
     private Date updateTime;
 
     /**
+     * 用户角色 0 - 普通用户 1 - 管理员
+     */
+    private Integer userRole;
+
+
+    /**
      * 逻辑删除
      */
     @TableLogic     //一定要加上这个注解，才代表逻辑删除

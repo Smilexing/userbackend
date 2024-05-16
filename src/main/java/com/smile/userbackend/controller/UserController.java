@@ -1,8 +1,10 @@
 package com.smile.userbackend.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.smile.userbackend.common.BaseResponse;
 import com.smile.userbackend.common.ErrorCode;
 import com.smile.userbackend.common.ResultUtil;
+import com.smile.userbackend.constant.UserConstant;
 import com.smile.userbackend.exception.BusinessException;
 import com.smile.userbackend.model.User;
 import com.smile.userbackend.model.request.UserLoginRequest;
@@ -14,6 +16,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.smile.userbackend.constant.UserConstant.ADMIN_ROLE;
+import static com.smile.userbackend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * @author Tom Smile
@@ -45,10 +54,40 @@ public class UserController {
     }
 
 //    根据用户名进行查询
-//    @GetMapping("/search")
-//    public BaseResponse<User> userSearch(String username,HttpServletRequest request) {
-//        return ResultUtil.success()
-//    }
+    @GetMapping("/search")
+    public BaseResponse<List<User>> userSearch(String username, HttpServletRequest request) {
+        if(!isAdmin(request))
+        {
+            throw new BusinessException(ErrorCode.NOT_AUTH);
+        }
+        if (StringUtils.isBlank(username)) {
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        if (StringUtils.isNotBlank(username)) {
+            queryWrapper.like("username", username);
+        }
+//        以列表的形式存放多条数据
+        List<User> userList = userService.list(queryWrapper);
+//        使用流处理
+        List<User> resultList = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
+
+        //        不使用流处理
+/*        List<User> resultList = new ArrayList<>();
+        for (User user : userList) {
+            User safety = userService.getSafetyUser(user);
+            resultList.add(safety);
+        }*/
+
+        return ResultUtil.success(resultList);
+    }
+
+//    判断是否是管理员
+    private boolean isAdmin(HttpServletRequest request) {
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null &&user.getUserRole() == ADMIN_ROLE;
+    }
 
 
     @PostMapping("/register")

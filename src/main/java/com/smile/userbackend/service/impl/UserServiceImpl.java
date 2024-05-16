@@ -3,7 +3,6 @@ package com.smile.userbackend.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.smile.userbackend.common.ErrorCode;
-import com.smile.userbackend.constant.UserConstant;
 import com.smile.userbackend.exception.BusinessException;
 import com.smile.userbackend.model.User;
 import com.smile.userbackend.service.UserService;
@@ -16,6 +15,8 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 import static com.smile.userbackend.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -127,11 +128,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return 1;
     }
 
-    private User getSafetyUser(User originUser) {
+
+
+    public User getSafetyUser(User originUser) {
         if (originUser == null) {
             return null;
         }
-
 //        脱敏对象-最后存放到数据库
 //        密码需要先进行加密处理再存放
         User safetyUser = new User();
@@ -142,6 +144,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setGender(originUser.getGender());
         safetyUser.setPhone(originUser.getPhone());
         safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setUserRole(originUser.getUserRole());
         safetyUser.setUserStatus(originUser.getUserStatus());
         safetyUser.setCreateTime(originUser.getCreateTime());
         return safetyUser;
