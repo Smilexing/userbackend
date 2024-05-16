@@ -56,17 +56,28 @@ public class UserController {
     @GetMapping("/current")
     public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
+        User currentUser = (User) userObj;      //通过session就可以拿到所有的信息，完全没必要再拿到id再去查数据库
         if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NULL_ERROR);
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
-        long userid = currentUser.getId();
-        User user = userService.getById(userid);
-        User safetyUser = userService.getSafetyUser(user);
-        return ResultUtil.success(safetyUser);
+//        long userid = currentUser.getId();
+//        User user = userService.getById(userid);
+//        User safetyUser = userService.getSafetyUser(user);
+        return ResultUtil.success(currentUser);
 
     }
 
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> userDelete(@RequestBody long userid, HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NOT_AUTH);
+        }
+        if (userid < 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean b = userService.removeById(userid);
+        return ResultUtil.success(b);
+    }
 
 //    根据用户名进行查询
     @GetMapping("/search")
