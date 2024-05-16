@@ -13,6 +13,12 @@ public class RegexUtils {
         return mismatch(account, RegexPatterns.ACCOUT_REGEX);
     }
 
+    /*
+     * 校验手机号
+     * */
+    public static boolean isPhoneInvaild(String phone) {
+        return mismatch(phone, RegexPatterns.PHONE_REGEX);
+    }
     private static boolean mismatch(String str, String regex) {
         if (StrUtil.isBlank(str)) {
             return true;

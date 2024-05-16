@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
 
 /**
  * 用户
@@ -12,6 +14,8 @@ import lombok.Data;
  */
 @TableName(value ="user")
 @Data
+@EqualsAndHashCode(callSuper = false)
+@Accessors(chain = true)
 public class User implements Serializable {
     /**
      * id
