@@ -12,6 +12,10 @@ spring:
     url: jdbc:mysql://localhost:3306/userbackend
     username: root
     password: 123456
+  redis:
+    database: 3
+    host: localhost
+    port: 6379
 
 mybatis-plus:
   configuration:
